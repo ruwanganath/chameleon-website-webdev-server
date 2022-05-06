@@ -11,4 +11,4 @@ npm run dev
 cd server  
 npm start
 
-Open http://localhost8081 in browser
+Open http://localhost8081 in browser.
