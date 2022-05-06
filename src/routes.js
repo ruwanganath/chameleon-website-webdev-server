@@ -7,6 +7,6 @@ module.exports = (app) => {
   app.post('/register',
     AuthenticationControllerPolicy.register,
     AuthenticationController.register),
-    app.post('/chameleonserver',
+    app.get('/chameleonserver',
     AuthenticationController.chameleon)
 }
