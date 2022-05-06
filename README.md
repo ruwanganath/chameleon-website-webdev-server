@@ -4,7 +4,7 @@ MongoDB, Express, Vue.js, Node.js Boilerplate
 
 
 ## Setup
--------------------
+-----------------
 cd client  
 npm run dev
 
