@@ -63,5 +63,16 @@ module.exports = {
         error: 'user login error on DB.'
       })
     }
+  },
+  async chameleon (req, res) {
+    try {        
+      res.send({
+        'Message': 'Chameleon service is working'
+      })     
+    } catch (err) {
+      res.status(400).send({
+        error: 'Chameleon error'
+      })
+    }
   }
 }
