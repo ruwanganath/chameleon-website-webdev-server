@@ -37,13 +37,13 @@ module.exports = {
       User.findOne({ email: email }, function (err, user) {
         if (!err) {
           if (!user) {
-            return res.status(403).send({
+            return res.status(200).send({
               error: 'Unknown username or e-mail'
             })
           }
           const isPasswordValid = user.comparePassword(password)
           if (!isPasswordValid) {
-            return res.status(403).send({
+            return res.status(200).send({
               error: 'Invalid password'
             })
           }
@@ -65,10 +65,10 @@ module.exports = {
     }
   },
   async chameleon (req, res) {
-    try {        
+    try {
       res.send({
         'Message': 'Chameleon service is working'
-      })     
+      })
     } catch (err) {
       res.status(400).send({
         error: 'Chameleon error'
