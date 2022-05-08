@@ -18,7 +18,7 @@ module.exports = {
           break
         case 'password':
           res.status(400).send({
-            error: 'Password must be 6-32 characters in length.'
+            error: 'Password must be 8-32 characters in length and alphanumeric.'
           })
           break
         default:
