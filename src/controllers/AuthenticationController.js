@@ -21,7 +21,7 @@ module.exports = {
             })
           }
         }
-      })
+      }) 
       let user = await User.create(req.body)
       res.send(user.toJSON())
     } catch (err) {
