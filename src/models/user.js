@@ -7,7 +7,11 @@ var UserSchema = new Schema({
   email: {
     type: String, unique: true
    },
-  password: String
+  password: String,
+  resetLink: {
+    data: String,
+    default: ''
+  }
 })
 
 UserSchema.pre('save', function (next) {
