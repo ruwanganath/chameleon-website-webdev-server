@@ -1,3 +1,5 @@
+const Promise = require('bluebird')
+const bcrypt = Promise.promisifyAll(require('bcrypt-nodejs'))
 const User = require('../models/user')
 const jwt = require('jsonwebtoken')
 const config = require('../config/config')
@@ -10,14 +12,6 @@ function jwtSignUser(user) {
     expiresIn: ONE_WEEK
   })
 }
-
-function resetToken(user) {
-  const ONE_WEEK = 60 * 60 * 24 * 7
-  return jwt.sign(user, config.newAuthentication.newJwtSecret, {
-    expiresIn: ONE_WEEK
-  })
-}
-
 
 
 function sendEmail(email, link){
@@ -34,8 +28,8 @@ function sendEmail(email, link){
   let mailOptions = {
     from: '"Chameleon" <chameleonsemail@gmail.com>', // sender address
     to: email,
-    subject: 'Account Activation Link',
-    html: link
+    subject: 'Chameleon: Reset your password',
+    html: `Click <a href="${link}">here</a> to reset your password!`
   };
 
   transporter.sendMail(mailOptions, function (error, info) {
@@ -129,38 +123,92 @@ module.exports = {
         return res.status(400).json({error: "User with this email does not exsits."});
       }
 
-      const userJson = user.toJSON();
-      tokenTemp = jwtSignUser(userJson);
-      const secret = tokenTemp + user.password;
+      const secret = "NEW_SECRET" + user.password;
 
       const payload = {
-        email: user.email,
-        id: user.id,
+        email: user.email
       };
 
       const token = jwt.sign(payload, secret, {expiresIn: '15m'});
-      const link = `http://localhost:8080/?#/web/reset-password/${user.id}/${token}`;
+      const link = `http://localhost:8080/?#/web/reset-password/${user.email}/${token}`;
 
       sendEmail(email, link);
 
     })
   },
 
+  //loads immediately after user opens reset password link
   async resetPassword(req, res) {
-    const {id, token} = req.paras;
-    res.send(req.params);
+    const {email, token} = req.query;
 
-    const userJson = user.toJSON();
-    tokenTemp = jwtSignUser(userJson);
-    const secret = tokenTemp + user.password;
+    User.findOne({email}, (err, user) => {
+      if (err || !user) {
+        return res.status(400).json({error: "User with this token does not exists"});
+      }
 
-    try{
+      const secret = "NEW_SECRET" + user.password;
 
-    }
-    catch (error ){
-        console.log(error.message)
-        res.send(error.message)
-    }
+      try {
+        const payload = jwt.verify(token, secret)
+        console.log(payload)
+        res.send({payload, code:"Successful match!"})
+      }
+      catch (error) {
+        console.log(error.message);
+        res.send(error.message);
+      }
+    })
+  },
 
-  }
+    async newPassword(req, res) {
+      const { email, password, confirmPassword } = req.body;
+
+      if(password !== confirmPassword) {
+        return res.status(400).send({
+          error: 'Passwords do not match'
+        })
+      }
+      try {
+        if(password.search(/[!\@\#\$\%\^\&\*\(\)\-\_\+\=\,\<\>\?]/) == 1)
+        {
+          return res.status(410).send({
+            error: 'Password must alphanumeric.'
+          })
+        }
+        if(password.length<8 || password.length>32)
+        {
+          return res.status(410).send({
+            error: 'Password must be 8-32 characters in length.'
+          })
+        }
+
+      }
+      catch(error){
+        res.status(400).send({
+          error: 'Something went wrong.'
+        })
+      }
+
+      bcrypt.genSalt(10, function (err, salt) {
+        if (err) {
+          return next(err)
+        }
+        bcrypt.hash(password, salt, null, function (err, hash) {
+          if (err) {
+            return next(err)
+          }
+          User.findOneAndUpdate({ email: email }, { password: hash}, (err) => {
+            if(err) {
+              console.log(err)
+            }
+          });
+        })
+      })
+
+
+      res.send({
+        message: 'Successful stored password.'
+      })
+
+    },
 }

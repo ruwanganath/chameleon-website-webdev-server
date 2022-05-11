@@ -6,6 +6,7 @@ module.exports = (app) => {
     app.post('/register', AuthenticationControllerPolicy.register, AuthenticationController.register),
     app.get('/chameleonserver', AuthenticationController.chameleon),
     app.post('/forgot', AuthenticationController.forgotPassword),
-    app.get('/reset-password/:id/:token', AuthenticationController.resetPassword)
+    app.get('/reset-password', AuthenticationController.resetPassword),
+    app.post('/new-password', AuthenticationController.newPassword)
 
 }
