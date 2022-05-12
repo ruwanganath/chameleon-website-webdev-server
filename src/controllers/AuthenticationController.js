@@ -14,9 +14,9 @@ function jwtSignUser(user) {
 }
 
 
-function sendEmail(email, link){
-   // create reusable transporter object using the default SMTP transport
-   let transporter = nodemailer.createTransport({
+function sendEmail(email, link) {
+  // create reusable transporter object using the default SMTP transport
+  let transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
       user: "chameleonsemail@gmail.com", // generated ethereal user
@@ -118,9 +118,9 @@ module.exports = {
   async forgotPassword(req, res) {
     const { email } = req.body;
 
-    User.findOne({email}, (err, user) => {
-      if(err || !user) {
-        return res.status(400).json({error: "User with this email does not exsits."});
+    User.findOne({ email }, (err, user) => {
+      if (err || !user) {
+        return res.status(400).json({ error: "User with this email does not exsits." });
       }
 
       const secret = "NEW_SECRET" + user.password;
@@ -129,7 +129,7 @@ module.exports = {
         email: user.email
       };
 
-      const token = jwt.sign(payload, secret, {expiresIn: '15m'});
+      const token = jwt.sign(payload, secret, { expiresIn: '15m' });
       const link = `http://localhost:8080/?#/web/reset-password/${user.email}/${token}`;
 
       sendEmail(email, link);
@@ -139,76 +139,72 @@ module.exports = {
 
   //loads immediately after user opens reset password link
   async resetPassword(req, res) {
-    const {email, token} = req.query;
+    const { email, token } = req.query;
 
-    User.findOne({email}, (err, user) => {
+    User.findOne({ email }, (err, user) => {
       if (err || !user) {
-        return res.status(400).json({error: "User with this token does not exists"});
+        return res.status(400).json({ error: "User with this token does not exists" });
       }
 
       const secret = "NEW_SECRET" + user.password;
 
       try {
         const payload = jwt.verify(token, secret)
-        console.log(payload)
-        res.send({payload, code:"Successful match!"})
+        res.send({ payload, code: "Successful match!" })
       }
       catch (error) {
-        console.log(error.message);
         res.send(error.message);
       }
     })
   },
 
-    async newPassword(req, res) {
-      const { email, password, confirmPassword } = req.body;
+  async newPassword(req, res) {
+    const { email, password, confirmPassword } = req.body;
 
-      if(password !== confirmPassword) {
-        return res.status(400).send({
-          error: 'Passwords do not match'
+    if (password !== confirmPassword) {
+      return res.status(400).send({
+        error: 'Passwords do not match'
+      })
+    }
+    try {
+      if (password.search(/[!\@\#\$\%\^\&\*\(\)\-\_\+\=\,\<\>\?]/) == 1) {
+        return res.status(410).send({
+          error: 'Password must alphanumeric.'
         })
       }
-      try {
-        if(password.search(/[!\@\#\$\%\^\&\*\(\)\-\_\+\=\,\<\>\?]/) == 1)
-        {
-          return res.status(410).send({
-            error: 'Password must alphanumeric.'
-          })
-        }
-        if(password.length<8 || password.length>32)
-        {
-          return res.status(410).send({
-            error: 'Password must be 8-32 characters in length.'
-          })
-        }
-
-      }
-      catch(error){
-        res.status(400).send({
-          error: 'Something went wrong.'
+      if (password.length < 8 || password.length > 32) {
+        return res.status(410).send({
+          error: 'Password must be 8-32 characters in length.'
         })
       }
 
-      bcrypt.genSalt(10, function (err, salt) {
+    }
+    catch (error) {
+      res.status(400).send({
+        error: 'Something went wrong.'
+      })
+    }
+
+    bcrypt.genSalt(10, function (err, salt) {
+      if (err) {
+        return next(err)
+      }
+      bcrypt.hash(password, salt, null, function (err, hash) {
         if (err) {
           return next(err)
         }
-        bcrypt.hash(password, salt, null, function (err, hash) {
+        User.findOneAndUpdate({ email: email }, { password: hash }, (err) => {
           if (err) {
-            return next(err)
+            console.log(err)
           }
-          User.findOneAndUpdate({ email: email }, { password: hash}, (err) => {
-            if(err) {
-              console.log(err)
-            }
-          });
-        })
+        });
       })
+    })
 
 
-      res.send({
-        message: 'Successful stored password.'
-      })
+    res.send({
+      message: 'Successful stored password.'
+    })
 
-    },
+  },
 }
