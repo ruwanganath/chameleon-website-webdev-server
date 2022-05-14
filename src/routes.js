@@ -9,6 +9,6 @@ module.exports = (app) => {
     AuthenticationController.register),
     app.get('/chameleonserver',
       AuthenticationController.chameleon)
-      app.get('/quickstart',
-      AuthenticationController.quickstart)
+      app.post('/profile',
+      AuthenticationController.profile)
 }
