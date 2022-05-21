@@ -10,8 +10,8 @@ function jwtSignUser (user) {
 }
 
 module.exports = {
-  async register (req, res) {
-    try {
+  async register (req, res) {    
+     try {
       const { email, password } = req.body
       User.findOne({ email: email }, function (err, user) {
         if (!err) {
