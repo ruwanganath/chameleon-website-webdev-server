@@ -8,7 +8,7 @@ app.use(bodyParser.json())
 app.use(cors())
 
 const mongoose = require('mongoose')
-mongoose.connect('mongodb+srv://chameleon_admin:GcWYlcK0xADZ8gth@cluster0.i6hsu.mongodb.net/chameleondb?authSource=admin&replicaSet=atlas-13myik-shard-0&readPreference=primary&appname=MongoDB%20Compass&ssl=true',{useNewUrlParser: true,useUnifiedTopology: true, useCreateIndex: true})
+mongoose.connect('mongodb+srv://chameleon_admin:GcWYlcK0xADZ8gth@cluster0.xoqtm.mongodb.net/chameleondb?authSource=admin&replicaSet=atlas-13myik-shard-0&readPreference=primary&appname=MongoDB%20Compass&ssl=true',{useNewUrlParser: true,useUnifiedTopology: true, useCreateIndex: true})
 const db = mongoose.connection
 db.on('error', console.error.bind(console, 'connection error'))
 db.once('open', function (callback) {
